@@ -13,12 +13,14 @@
 #include "semaphore.h"
 #include "sharedMemory.h"
 
-#define TAILLE 440
 #define TAILLEMSGTUBE 23
 
-static int idMem;
 
 void fin(){
+  int idMem;
+  if (idMem = open_shmem(200, sizeof(TAILLEMSGTUBE)*20) == -1) {
+    perror("fin_open_shmem"); exit(-1);
+  }
   remove_shmem(idMem);
   exit(1);
 }
@@ -83,6 +85,7 @@ void main() {
   printf("Semaphore initialisé\n");
 
   // Creating the shared memory
+  int idMem;
   if ((idMem = create_shmem(cleMem, sizeof(SHMEM)*20)) == -1){
     perror("create_shmem");
     exit(-1);

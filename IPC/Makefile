@@ -15,5 +15,7 @@ affichage.o: semaphore.o
 semaphore.o:
 	$(CC) -c  semaphore.c -o  semaphore.o
 
+agence : agence.c
+	$(CC) agence.c -o AGE
 clean:
 	rm -rf *.o IPC

@@ -5,13 +5,14 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 #include <sys/sem.h>
-//#include <shm.h>
-#include "shmem.h"
-#include "semaphore.h"
-#include "sharedMemory.h"
 #include <time.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "shmem.h"
+#include "semaphore.h"
+#include "sharedMemory.h"
+
 #define TAILLE 440
 #define TAILLEMSGTUBE 23
 

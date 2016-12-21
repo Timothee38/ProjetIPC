@@ -1,10 +1,13 @@
 CC = gcc
 
-all: clean ecrivain.o affichage.o semaphore.o
+all: ecrivain.o semaphore.o
 	$(CC) ecrivain.o semaphore.o -o IPC
 
-affichage: affichage.o
-	$(CC) -c affichage.o semaphore.o -o affichage
+affichage: affichage.o semaphore.o
+	$(CC) affichage.o semaphore.o -o AFF
+
+agence : agence.c
+		$(CC) agence.c -o AGE
 
 ecrivain.o: semaphore.o
 	$(CC) -c ecrivain.c -o ecrivain.o
@@ -15,7 +18,5 @@ affichage.o: semaphore.o
 semaphore.o:
 	$(CC) -c  semaphore.c -o  semaphore.o
 
-agence : agence.c
-	$(CC) agence.c -o AGE
 clean:
-	rm -rf *.o IPC
+	rm -rf *.o IPC AGE AFF

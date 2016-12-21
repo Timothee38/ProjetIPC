@@ -57,10 +57,10 @@ void addShareMem(SHMEM* pshmem, char *destseats){
       printf("seats I : %s\n", seats);
     i = 0;
 
-    while((pshmem[i].destination[0]) != '?') {
-      i++;
-  }
-      strcpy(pshmem[i].destination, dest+'\0');
+      while((pshmem[i].destination[0]) != '?') {
+        i++;
+      }
+      strcpy(pshmem[i].destination, dest);
       pshmem[i].nbSeats = atoi(seats);
 }
 
@@ -90,6 +90,7 @@ void main() {
     perror("create_shmem");
     exit(-1);
   }
+  printf("%d\n", idMem);
 
   printf("Mem initialisé\n");
   SHMEM *ShrdMem = (SHMEM *)attach_shmem(idMem);

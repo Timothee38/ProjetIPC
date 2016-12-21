@@ -6,6 +6,6 @@ If you're going to do a PR on this repo, **PLEASE** run a make clean before push
 ## TODO
 
   - ecrivain.c ✓
-  - affichage.c
-  - agence.c
-  - client.c
+  - affichage.c ~✓
+  - agence.c *Alex WIP*
+  - client.c *Alex WIP*

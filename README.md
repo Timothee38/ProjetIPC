@@ -5,7 +5,7 @@ If you're going to do a PR on this repo, **PLEASE** run a make clean before push
 
 ## TODO
 
-  - ecrivain.c ✓
+  - ecrivain.c ✓ Rework this to remove this wtfsegfault???
   - affichage.c ✓
   - agence.c ✓
   - client.c ✓

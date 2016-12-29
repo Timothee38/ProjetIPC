@@ -6,6 +6,9 @@ If you're going to do a PR on this repo, **PLEASE** run a make clean before push
 ## TODO
 
   - ecrivain.c ✓
-  - affichage.c ~✓
-  - agence.c *Alex WIP*
-  - client.c *Alex WIP*
+  - affichage.c ✓
+  - agence.c ✓
+  - client.c ✓
+
+  - **Testing**: Unit testing, load testing, program testing... *On it's way, maybe tomorrow lol*
+  - **Cleanup** when the project is done (aka refactoring) *On it's way when testing is done*

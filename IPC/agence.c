@@ -12,13 +12,23 @@
 #include "semaphore.h"
 #include "sharedMemory.h"
 
-void fin(){
+
+
+void finAgence(){
+	
+	//Fermeture de la boite
 	int idBoite;
 	if ((idBoite = msgget(300, 0666|IPC_CREAT))==-1){
 		perror("Erreur boite aux lettres");
 		exit(-1);
 	}
 	msgctl(idBoite, IPC_RMID, NULL);
+	
+	int idMutexPID = open_semaphore(500);	
+	SHMEMPID *ShrdMemPID = (SHMEMPID *)attach_shmem(open_shmem(500,sizeof(SHMEMPID)*5));
+	printf("Fermeture Agence\n");
+	kill(ShrdMemPID[3].pid, SIGKILL); //Femrmeture du client
+	kill(ShrdMemPID[0].pid, SIGINT);  //Fermeture finale de l'écrivain une 2eme fois pour être sur
 	exit(1);
 }
 
@@ -60,14 +70,11 @@ int verificationMemoire(SHMEM* ShrdMem, char *commande, int seats, int longDest,
 
 
 void commandeValide(){
-	printf("Commande Validée avec succès!\n");
-	//Ne fait rien pour le moment
-	
+	printf("Commande Validée avec succès!\n");	
 }
 
 void commandeInvalide(){
 	printf("Commande non disponible :(\n"); 
-	//Ne fait rien pour le moment
 }
 
 void main(){
@@ -78,11 +85,13 @@ void main(){
 		char mess[20];
 	} comma, commande, seats;
 	
+	//Déclarations des variables
 	key_t cleBoite = 300;
-
 	int pid;
 	int idBoite;
-	signal(SIGKILL, fin); //Protection pour la fermeture
+	
+	//Protection pour la fermeture
+	 
 
 	//Création de la boite aux lettres
 	if((idBoite = msgget(cleBoite, 0666|IPC_CREAT))==-1){
@@ -91,17 +100,20 @@ void main(){
 	}
 	printf("Boite aux lettres crée!\n");
 
-
+	//Création du Client
 	switch(pid = fork()) {
 
+	//Cas d'erreur
     case -1:
-    
+	
       fprintf(stderr, "Erreur lors de la création du client.\n");
       break;
       
-    case 0: //the son of the process : Client
+    //the son of the process : Client  
+    case 0:
 		
-		signal(SIGUSR1, commandeValide); //Protection des signaux de validation de l'agence
+		//Protection des signaux de validation de l'agence
+		signal(SIGUSR1, commandeValide); 
 		signal(SIGUSR2, commandeInvalide);
 
 		char sieges[2] = "";
@@ -123,41 +135,64 @@ void main(){
 		commande.messageType = 2;
 		msgsnd(idBoite, &commande, 8,0);
 		
-
+		
     
     
-
-	default : //Le process Agence lui même
+	//Le process Agence lui même
+	default : 
 	
 		printf("Bienvenue chez l'agence de Voyage, les derniers vols sont actualisés régulièrement!\n");
-		
+		signal(SIGINT, finAgence);
 		int cleMutex = 100;
 	    int cleShMem = 200;
-		int vr =4;
-		int idMutex;
-
+	    int cleMemPID = 500;
+		int cleMutexPID = 600;
+		int idMutex; int idMutexPID; int idMemPID;
+		
+		//Connexion au mutex et à la mémoire des destinations
 		idMutex = open_semaphore(cleMutex);
 		printf("Semaphore Mutex Ouvert\n");
 		
+		down(idMutex);
 		SHMEM *ShrdMem = (SHMEM *)attach_shmem(open_shmem(cleShMem,sizeof(SHMEM)*20));
+		up(idMutex);
 		printf("Mémoire connectée!\n");
 		
 		
-		msgrcv(idBoite, &comma, cleBoite, 1,0); //Reception de la destination
-		msgrcv(idBoite, &seats, cleBoite, 2,0); //Reception du nombre de sièges
+		//Connexion au mutex et à la mémoire des PID
+		idMutexPID = open_semaphore(cleMutexPID);
+		printf("Semaphore Mutex PID Ouvert\n");
 		
-		/*
+		down(idMutexPID);
+		SHMEMPID *ShrdMemPID = (SHMEMPID *)attach_shmem(open_shmem(cleMemPID,sizeof(SHMEMPID)*5));
+		up(idMutexPID);
+		printf("Mémoire PID connectée!\n");
+		
+		//Ajout du PID Agence
+		down(idMutexPID);
+	    ShrdMemPID[2].pid = getpid();
+	    ShrdMemPID[3].pid = pid;     
+        up(idMutexPID);	 
+        
+        //Reception de la destination puis du nombre de sièges 
+		msgrcv(idBoite, &comma, cleBoite, 1,0); 
+		msgrcv(idBoite, &seats, cleBoite, 2,0);
+		
+		/* Debug
 		printf("Message recu\n");
 		printf("Commande Recue : %s\n", comma.mess);
 		printf("longeur chaine recue : %d\n", strlen(comma.mess));
 		printf("Sièges Recus : %d\n", atoi(seats.mess));
 		*/
 		
+		//Vérification et écritoure dans la mémoire
 		down(idMutex);
-		vr = verificationMemoire(ShrdMem, comma.mess,atoi(seats.mess),strlen(comma.mess), pid);
+		int vr = verificationMemoire(ShrdMem, comma.mess,atoi(seats.mess),strlen(comma.mess), pid);
 		if(vr == -1){printf("Agence : commande echouée\n");}
 		if(vr == 0){printf("Agence : commande réussie\n");}
 		up(idMutex);
+		
+		//Fermeture des processus
 		kill(pid, SIGKILL);
 		    
 			

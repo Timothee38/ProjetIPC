@@ -4,3 +4,9 @@ typedef struct shmem_model {
 } SHMEM;
 
 typedef SHMEM* pShMem;
+
+typedef struct shmem_model2 {
+  int pid;
+} SHMEMPID;
+
+typedef SHMEMPID* pShMemPID;

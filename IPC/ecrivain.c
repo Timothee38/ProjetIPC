@@ -21,15 +21,15 @@ void finEcrivain(){
 	
 	if(premierPassage == 0){
 		
-		int idMutexPID = open_semaphore(500);	
-		SHMEMPID *ShrdMemPID = (SHMEMPID *)attach_shmem(open_shmem(500,sizeof(SHMEMPID)*5));
+		int idMutex = open_semaphore(100);	
+		SHMEM *ShrdMem = (SHMEM *)attach_shmem(open_shmem(200,sizeof(SHMEM)*22));
 		
 		printf("Lancement de la fermeture\n");
 		signal(SIGINT, finEcrivain);
 		premierPassage = 1;
 		
-		kill(ShrdMemPID[1].pid, SIGKILL); //Fermeture du fils
-		kill(ShrdMemPID[4].pid, SIGINT); //Femrmeture de l'affichage
+		kill(ShrdMem[1].pid, SIGKILL); //Fermeture du fils
+		kill(ShrdMem[4].pid, SIGINT); //Femrmeture de l'affichage
 		
 	}else{
 		
@@ -37,20 +37,14 @@ void finEcrivain(){
 	  
 	  //Supression des mémoires partagées
 	  int idMem;
-	  if (idMem = open_shmem(200, sizeof(TAILLEMSGTUBE)*20) == -1) {
+	  if (idMem = open_shmem(200, sizeof(SHMEM)*22) == -1) {
 	    perror("fin_open_shmem"); exit(-1);
 	  }
 	  remove_shmem(idMem);
-
-	  int idMemPID;
-	  if (idMemPID = open_shmem(500, sizeof(SHMEMPID)*5) == -1) {
-	    perror("fin_open_shmem"); exit(-1);
-	  }
-	  remove_shmem(idMemPID);
 	  
 	  //Supression des sémaphores
 	  remove_semaphore(open_semaphore(100));
-	  remove_semaphore(open_semaphore(600));
+	  remove_semaphore(open_semaphore(400));
 	  
 	  //THE END
 	  exit(1);
@@ -89,7 +83,7 @@ void addShareMem(SHMEM* pshmem, char *destseats){
       printf("seats I : %s\n", seats);
     i = 0;
 
-      while((pshmem[i].destination[0]) != '?') {
+      while((pshmem[i].destination[0]) != '?' && i < 20) {
         i++;
       }
       strcpy(pshmem[i].destination, dest);
@@ -101,8 +95,6 @@ void main() {
   int pid;
   int cleMem = 200;
   int cleMutex = 100;
-  int cleMemPID = 500;
-  int cleMutexPID = 600;
   int cleRemainingDest = 400;
 
   signal(SIGCONT, lecture);
@@ -111,11 +103,6 @@ void main() {
   int idMutex  = create_semaphore(cleMutex);
   if(init_semaphore(idMutex, 1)==-1) exit(1);
   printf("Mutex initialisé\n");
-  
-  //Initialising the PIDmem mutex
-  int idMutexPID  = create_semaphore(cleMutexPID);
-  if(init_semaphore(idMutexPID, 1)==-1) exit(1);
-  printf("Mutex PID initialisé\n");
 
   // Creating the semaphore counting the amount of destinations remaining
   int idRemainingDest = create_semaphore(cleMutex);
@@ -124,7 +111,7 @@ void main() {
 
   // Creating the shared memory
   int idMem;
-  if ((idMem = create_shmem(cleMem, sizeof(SHMEM)*20)) == -1){
+  if ((idMem = create_shmem(cleMem, sizeof(SHMEM)*22)) == -1){
     perror("create_shmem");
     exit(-1);
   }
@@ -133,18 +120,6 @@ void main() {
   printf("Mem initialisé\n");
   SHMEM *ShrdMem = (SHMEM *)attach_shmem(idMem);
   initShareMem(ShrdMem);
-  
-   // Creating the shared memory used to store the PIDs
-  int idMemPID;
-  if ((idMemPID = create_shmem(cleMemPID, sizeof(SHMEMPID)*5)) == -1){
-    perror("create_shmemPID");
-    exit(-1);
-  }
-  printf("%d\n", idMemPID);
-
-  printf("Mem PID initialisée\n");
-  SHMEMPID *ShrdMemPID = (SHMEMPID *)attach_shmem(idMemPID);
-
 
   // Creating the pipe
   int desc[2];
@@ -165,7 +140,7 @@ void main() {
       
       int dest;
       int seats;
-      const char* destination[] = {"Paris","New York","Londres","San Francisco","Amsterdam","Lyon","Pyongyang","Rome","La Havane","Sydney"};
+      const char* destination[] = {"Paris","New-York","Londres","Tokyo","Amsterdam","Lyon","Pyongyang","Rome","La-Havane","Sydney","San-Francisco","Seoul","Munich","Shangai","Hong-Kong","Singapour","Ho-Chi-Minh","Rio-de-Janeiro","Kuala-Lumpu","We-Are-Number-One"};
       int i = 0;
 
       while(1) {
@@ -195,7 +170,7 @@ void main() {
 		 kill(getppid(), SIGCONT); //Envoi du signal pour réveiller écrivain
 		 i++;
 
-		 if(i==10){i = 0;}	//10 = Taille de la liste de destinations
+		 if(i==20){i = 0;}	//10 = Taille de la liste de destinations
       }
       break;
     default: // The process itself Ecrivain
@@ -210,10 +185,10 @@ void main() {
 	     close(desc[1]); //Ecrivain n'a pas besoin d'écrire dans le pipe
 	     signal(SIGINT, finEcrivain);
 	     //Ajout du PID Ecrivain 
-	     down(idMutexPID);
-	     ShrdMemPID[0].pid = getpid();
-	     ShrdMemPID[1].pid = pid;     
-         up(idMutexPID);
+	     down(idMutex);
+	     ShrdMem[0].pid = getpid();
+	     ShrdMem[1].pid = pid;     
+         up(idMutex);
          
          /* Tableau des PIDs
           * 0 = Ecrivain
@@ -232,11 +207,11 @@ void main() {
         printf("down(idRemainingDest)\n");
         read(desc[0],&toAdd,23);
         printf("dans le pere : %s \n", toAdd);
+        
+        //on ecrit gentillement la nouvelle entrée dans la case de Database qui va bien
         down(idMutex);
         addShareMem(ShrdMem, toAdd);
         afficheShareMem(ShrdMem);
-
-        //on ecrit gentillement la nouvelle entrée dans la case de Database qui va bien
         up(idMutex);
 	    printf("PERE : UP MUTEX\n");
 

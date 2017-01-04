@@ -2,6 +2,8 @@ CC = gcc
 
 all: ecrivain.o semaphore.o affichage.o agence.o
 	$(CC) ecrivain.o semaphore.o -o IPC
+	$(CC) affichage.o semaphore.o -o AFF
+	$(CC) agence.o semaphore.o -o AGE
 
 affichage: affichage.o semaphore.o
 	$(CC) affichage.o semaphore.o -o AFF

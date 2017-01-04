@@ -24,11 +24,11 @@ void finAgence(){
 	}
 	msgctl(idBoite, IPC_RMID, NULL);
 	
-	int idMutexPID = open_semaphore(500);	
-	SHMEMPID *ShrdMemPID = (SHMEMPID *)attach_shmem(open_shmem(500,sizeof(SHMEMPID)*5));
+	int idMutex = open_semaphore(100);	
+	SHMEM *ShrdMem = (SHMEM *)attach_shmem(open_shmem(200,sizeof(SHMEM)*22));
 	printf("Fermeture Agence\n");
-	kill(ShrdMemPID[3].pid, SIGKILL); //Femrmeture du client
-	kill(ShrdMemPID[0].pid, SIGINT);  //Fermeture finale de l'écrivain une 2eme fois pour être sur
+	kill(ShrdMem[3].pid, SIGKILL); //Femrmeture du client
+	kill(ShrdMem[0].pid, SIGINT);  //Fermeture finale de l'écrivain une 2eme fois pour être sur
 	exit(1);
 }
 
@@ -53,7 +53,7 @@ int verificationMemoire(SHMEM* ShrdMem, char *commande, int seats, int longDest,
 					if(ShrdMem[i].nbSeats >= seats){
 						//printf("SHRDMEM sts =  %d |sts = %d \n", ShrdMem[i].nbSeats,seats);
 						ShrdMem[i].nbSeats = ShrdMem[i].nbSeats - seats;
-						printf("Commande Valide!\n");
+						//printf("Commande Valide!\n");
 						kill(pidClient, SIGUSR1);
 						j = 21;
 						i = 21;
@@ -98,7 +98,9 @@ void main(){
 		perror("Erreur boite aux lettres");
 		exit(-1);
 	}
-	printf("Boite aux lettres crée!\n");
+	//printf("Boite aux lettres crée!\n");
+	
+	printf("Bienvenue chez l'agence de Voyage, les derniers vols sont actualisés régulièrement!\n");
 
 	//Création du Client
 	switch(pid = fork()) {
@@ -141,38 +143,27 @@ void main(){
 	//Le process Agence lui même
 	default : 
 	
-		printf("Bienvenue chez l'agence de Voyage, les derniers vols sont actualisés régulièrement!\n");
 		signal(SIGINT, finAgence);
 		int cleMutex = 100;
 	    int cleShMem = 200;
-	    int cleMemPID = 500;
-		int cleMutexPID = 600;
-		int idMutex; int idMutexPID; int idMemPID;
+	    
+		int idMutex;
 		
 		//Connexion au mutex et à la mémoire des destinations
 		idMutex = open_semaphore(cleMutex);
-		printf("Semaphore Mutex Ouvert\n");
+		//printf("Semaphore Mutex Ouvert\n");
 		
 		down(idMutex);
-		SHMEM *ShrdMem = (SHMEM *)attach_shmem(open_shmem(cleShMem,sizeof(SHMEM)*20));
+		SHMEM *ShrdMem = (SHMEM *)attach_shmem(open_shmem(cleShMem,sizeof(SHMEM)*22));
 		up(idMutex);
-		printf("Mémoire connectée!\n");
+		//printf("Mémoire connectée!\n");
 		
-		
-		//Connexion au mutex et à la mémoire des PID
-		idMutexPID = open_semaphore(cleMutexPID);
-		printf("Semaphore Mutex PID Ouvert\n");
-		
-		down(idMutexPID);
-		SHMEMPID *ShrdMemPID = (SHMEMPID *)attach_shmem(open_shmem(cleMemPID,sizeof(SHMEMPID)*5));
-		up(idMutexPID);
-		printf("Mémoire PID connectée!\n");
-		
+
 		//Ajout du PID Agence
-		down(idMutexPID);
-	    ShrdMemPID[2].pid = getpid();
-	    ShrdMemPID[3].pid = pid;     
-        up(idMutexPID);	 
+		down(idMutex);
+	    ShrdMem[2].pid = getpid();
+	    ShrdMem[3].pid = pid;     
+        up(idMutex);	 
         
         //Reception de la destination puis du nombre de sièges 
 		msgrcv(idBoite, &comma, cleBoite, 1,0); 

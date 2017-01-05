@@ -31,8 +31,9 @@ void finAffichage() {
 	
 	SHMEM *ShrdMem = (SHMEM *)attach_shmem(open_shmem(200,sizeof(SHMEM)*22));
 	printf("Fermeture Affichage\n");
-	kill(ShrdMem[2].pid, SIGINT); //Femrmeture de l'Agence
 	kill(ShrdMem[0].pid, SIGINT);  //Fermeture finale de l'écrivain 
+	sleep(1);
+	kill(ShrdMem[2].pid, SIGINT); //Femrmeture de l'Agence
 	
     exit(1);
 }

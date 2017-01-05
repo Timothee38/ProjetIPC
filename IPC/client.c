@@ -21,10 +21,15 @@ void finClient() {
 
 void commandeValide(){
   printf("Commande Validée avec succès!\n");
+    sleep(10);
+    printf("Au revoir!\n");
+  
 }
 
 void commandeInvalide(){
 	printf("Commande non disponible :(\n");
+    sleep(10);
+    printf("Au revoir!\n");	
 }
 
 void main() {
@@ -72,5 +77,5 @@ void main() {
 
   // Envoi du message dans la BAL
   msgsnd(idBoite, &commande, sizeof(commande.mtext),0);
-  sleep(10);
+  pause(10);
 }

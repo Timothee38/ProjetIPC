@@ -72,7 +72,6 @@ void main(){
 
 	//Déclarations des variables
 	key_t cleBoite = 300;
-	int pid;
 	int idBoite;
 	int cleMutex = 100;
 	int cleShMem = 200;
@@ -93,7 +92,6 @@ void main(){
 	//Ajout du PID Agence
 	down(idMutex);
 	ShrdMem[2].pid = getpid();
-	ShrdMem[3].pid = pid;
 	up(idMutex);
 
 	//Création de la boite aux lettres
@@ -135,20 +133,5 @@ int i;
 		}
 		up(idMutex);
 
-		//kill(clientPid, SIGKILL);
-
 	}
-
-
-/*		//Vérification et écritoure dans la mémoire
-		down(idMutex);
-		int vr = verificationMemoire(ShrdMem, comma.mess,atoi(seats.mess),strlen(comma.mess), pid);
-		if(vr == -1){printf("Agence : commande echouée\n");}
-		if(vr == 0){printf("Agence : commande réussie\n");}
-		up(idMutex);
-
-		//Fermeture des processus
-		kill(pid, SIGKILL);
-*/
-
 }

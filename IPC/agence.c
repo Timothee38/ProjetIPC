@@ -26,20 +26,46 @@ void finAgence(){
 	int idMutex = open_semaphore(100);
 	SHMEM *ShrdMem = (SHMEM *)attach_shmem(open_shmem(200,sizeof(SHMEM)*22));
 	printf("Fermeture Agence\n");
-	kill(ShrdMem[3].pid, SIGKILL); //Femrmeture du client
 	kill(ShrdMem[0].pid, SIGINT);  //Fermeture finale de l'écrivain une 2eme fois pour être sur
 	exit(1);
 
 }
 
-int verificationMemoire(SHMEM* ShrdMem, char *destination, int seats, int longDest, int pidClient){
-
-	// Todo : Parcours ShrdMem, rechere destination dans shrdmem, retire seats, kill client
-	int i;
-	for (i = 0; i < 20; i++) { // Parcours Shared Mem
-
-	}
-
+ int verificationMemoire(SHMEM* ShrdMem, char *commande, int seats, int longDest, int pidClient){
+ 	int i;
+ 	int j;
+ 	int ok = 0;
+ 	int retour = -1;
+ 	
+   for(i = 0; i < 20; i++) {
+ 	  ok = 0;
+ 	  
+ 	  for(j = 0; j < 20; j++){
+ 		  //printf("SHRDMEM =  %c |Commande = %c \n", ShrdMem[i].destination[j],commande[j]); //Debug
+ 		  if(ShrdMem[i].destination[j] == '?'){
+ 		     j = 21;
+ 		  }else{
+ 			 if(ShrdMem[i].destination[j] == commande[j]){
+ 				ok = ok+1;
+ 				//printf("ok = %d\n", ok);
+ 				if(ok == longDest){
+ 					if(ShrdMem[i].nbSeats >= seats){
+ 						//printf("SHRDMEM sts =  %d |sts = %d \n", ShrdMem[i].nbSeats,seats);
+ 						ShrdMem[i].nbSeats = ShrdMem[i].nbSeats - seats;
+-						printf("Commande Valide!\n");
++						//printf("Commande Valide!\n");
+ 						kill(pidClient, SIGUSR1);
+ 						j = 21;
+ 						i = 21;
+ 						retour = 0;
+ 				  }
+ 			   }
+ 			}
+ 		 }
+ 	  }
+    }
+    if(retour != 0){kill(pidClient, SIGUSR2);}
+    return retour;
 }
 
 void main(){

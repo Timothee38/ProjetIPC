@@ -72,5 +72,5 @@ void main() {
 
   // Envoi du message dans la BAL
   msgsnd(idBoite, &commande, sizeof(commande.mtext),0);
-
+  sleep(10);
 }

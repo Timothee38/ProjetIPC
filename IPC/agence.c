@@ -26,7 +26,7 @@ void finAgence(){
   int idMutex = open_semaphore(100);
   SHMEM *ShrdMem = (SHMEM *)attach_shmem(open_shmem(200,sizeof(SHMEM)*22));
   printf("Fermeture Agence\n");
-  kill(ShrdMem[0].pid, SIGINT);  // Fermeture finale de l'écrivain une 2eme fois pour être sur
+  kill(ShrdMem[0].pid, SIGINT);  // Fermeture de l'écrivain
   exit(1);
 
 }
@@ -37,22 +37,22 @@ int verificationMemoire(SHMEM* ShrdMem, char *commande, int seats, int longDest,
   int ok = 0;
   int retour = -1;
 
-  for(i = 0; i < 20; i++) {
+  for(i = 0; i < 20; i++) { //On verifie toute la liste des destinations
     ok = 0;
 
-    for(j = 0; j < 20; j++){
+    for(j = 0; j < 20; j++){ 							//On compare chaque lettre
       //printf("SHRDMEM =  %c |Commande = %c \n", ShrdMem[i].destination[j],commande[j]); //Debug
-      if(ShrdMem[i].destination[j] == '?'){
+      if(ShrdMem[i].destination[j] == '?'){ 			//Jusque à la lettre ?
         j = 21;
       }else{
-        if(ShrdMem[i].destination[j] == commande[j]){
+        if(ShrdMem[i].destination[j] == commande[j]){   //Si deux lettres sont identiques on incrémente un compteur
           ok = ok+1;
           //printf("ok = %d\n", ok);
-          if(ok == longDest){
-            if(ShrdMem[i].nbSeats >= seats){
+          if(ok == longDest){ 							//Si ce compteur est egal à la longeur de la chaine recue ( ex Paris = 5 )
+            if(ShrdMem[i].nbSeats >= seats){ 			//Et que le nombre de places est suffisant
               //printf("SHRDMEM sts =  %d |sts = %d \n", ShrdMem[i].nbSeats,seats);
               ShrdMem[i].nbSeats = ShrdMem[i].nbSeats - seats;
-              printf("Commande Valide!\n");
+              printf("Commande Valide!\n");				//On l'ecrit dans la memoire et on envoie un signal de confirmation
               kill(pidClient, SIGUSR1);
               j = 21;
               i = 21;
@@ -63,7 +63,7 @@ int verificationMemoire(SHMEM* ShrdMem, char *commande, int seats, int longDest,
       }
     }
   }
-  if(retour != 0){kill(pidClient, SIGUSR2);}
+  if(retour != 0){kill(pidClient, SIGUSR2);}			//Sinon on envoie un signal d'echec
   return retour;
 }
 

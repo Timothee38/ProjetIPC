@@ -34,7 +34,8 @@ void commandeInvalide(){
 }
 
 void main() {
-
+	
+  //Protection contre les signaux
   signal(SIGUSR1, commandeValide);
   signal(SIGUSR2, commandeInvalide);
   signal(SIGINT, finClient);
@@ -52,13 +53,10 @@ void main() {
   MSG commande;
 
   //Saisie de la commande
-
   printf("Entrez votre destination :\n");
   scanf("%s", &dest);
-
   printf("Combien souhaitez vous de places pour %s :\n", dest);
   scanf("%s", &seats);
-
   commande.mtype = 1;
 
   // Remplissage du message
@@ -68,8 +66,7 @@ void main() {
   strcat(commande.mtext, " ");
   strcat(commande.mtext, convertedPid);
   strcat(commande.mtext, "\0");
-
-  printf("Message envoyé : %s\n", commande.mtext);
+  //printf("Message envoyé : %s\n", commande.mtext);
 
   // Création et envoi du message dans la BAL
   if((idBoite = msgget(cleBoite, 0666))==-1){

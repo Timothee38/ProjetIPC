@@ -7,7 +7,7 @@ If you're going to do a PR on this repo, **PLEASE** run a make clean before push
 
   - ecrivain.c ✓
   - affichage.c ✓
-  - agence.c x refactor mode
-  - client.c x todo: finish this / edit makefile
+  - agence.c  ✓
+  - client.c  ✓
 
-  - **Cleanup** when the project is done (aka refactoring) *On it's way when testing is done*
+  - **Cleanup** Read the code / Add comments / Check for potential improvements

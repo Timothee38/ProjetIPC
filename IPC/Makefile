@@ -8,7 +8,7 @@ all: ecrivain.o semaphore.o affichage.o agence.o client.o
 
 affichage: affichage.o semaphore.o
 	$(CC) affichage.o semaphore.o -o AFF
-	
+
 client: client.o semaphore.o
 	$(CC) client.o semaphore.o -o CLT
 
@@ -23,7 +23,7 @@ ecrivain.o: semaphore.o
 
 affichage.o: semaphore.o
 	$(CC) -c affichage.c -o affichage.o
-	
+
 client.o: semaphore.o
 	$(CC) -c client.c -o client.o
 
@@ -31,4 +31,4 @@ semaphore.o:
 	$(CC) -c  semaphore.c -o  semaphore.o
 
 clean:
-	rm -rf *.o IPC AGE AFF
+	rm -rf *.o IPC AGE AFF CLT

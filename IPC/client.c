@@ -21,15 +21,15 @@ void finClient() {
 
 void commandeValide(){
   printf("Commande Validée avec succès!\n");
-    sleep(10);
-    printf("Au revoir!\n");
-  
+  sleep(10);
+  printf("Au revoir!\n");
+
 }
 
 void commandeInvalide(){
-	printf("Commande non disponible :(\n");
-    sleep(10);
-    printf("Au revoir!\n");	
+  printf("Commande non disponible :(\n");
+  sleep(10);
+  printf("Au revoir!\n");	
 }
 
 void main() {
@@ -39,7 +39,7 @@ void main() {
   signal(SIGINT, finClient);
 
   key_t cleBoite = 300;
-	int idBoite;
+  int idBoite;
 
   char dest[20] = "";
   char seats[2] = "";
@@ -52,11 +52,11 @@ void main() {
 
   //Saisie de la commande
 
-    printf("Entrez votre destination :\n");
-    scanf("%s", &dest);
+  printf("Entrez votre destination :\n");
+  scanf("%s", &dest);
 
-    printf("Combien souhaitez vous de places pour %s :\n", dest);
-    scanf("%s", &seats);
+  printf("Combien souhaitez vous de places pour %s :\n", dest);
+  scanf("%s", &seats);
 
   commande.mtype = 1;
 

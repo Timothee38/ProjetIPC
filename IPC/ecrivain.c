@@ -17,38 +17,38 @@
 
 void finEcrivain(){
 
-	static int premierPassage = 0;
+  static int premierPassage = 0;
 
-	if(premierPassage == 0){
+  if(premierPassage == 0){
 
-		int idMutex = open_semaphore(100);
-		SHMEM *ShrdMem = (SHMEM *)attach_shmem(open_shmem(200,sizeof(SHMEM)*22));
+    int idMutex = open_semaphore(100);
+    SHMEM *ShrdMem = (SHMEM *)attach_shmem(open_shmem(200,sizeof(SHMEM)*22));
 
-		printf("Lancement de la fermeture\n");
-		signal(SIGINT, finEcrivain);
-		premierPassage = 1;
+    printf("Lancement de la fermeture\n");
+    signal(SIGINT, finEcrivain);
+    premierPassage = 1;
 
-		kill(ShrdMem[1].pid, SIGKILL); //Fermeture du fils
-		kill(ShrdMem[4].pid, SIGINT); //Femrmeture de l'affichage
+    kill(ShrdMem[1].pid, SIGKILL); //Fermeture du fils
+    kill(ShrdMem[4].pid, SIGINT); //Femrmeture de l'affichage
 
-	}else{
+  }else{
 
-	  printf("Extinction de l'écrivain\n");
+    printf("Extinction de l'écrivain\n");
 
-	  //Supression des mémoires partagées
-	  int idMem;
-	  if (idMem = open_shmem(200, sizeof(SHMEM)*22) == -1) {
-	    perror("fin_open_shmem"); exit(-1);
-	  }
-	  remove_shmem(idMem);
+    //Supression des mémoires partagées
+    int idMem;
+    if (idMem = open_shmem(200, sizeof(SHMEM)*22) == -1) {
+      perror("fin_open_shmem"); exit(-1);
+    }
+    remove_shmem(idMem);
 
-	  //Supression des sémaphores
-	  remove_semaphore(open_semaphore(100));
-	  remove_semaphore(open_semaphore(400));
+    //Supression des sémaphores
+    remove_semaphore(open_semaphore(100));
+    remove_semaphore(open_semaphore(400));
 
-	  //THE END
-	  exit(1);
-	}
+    //THE END
+    exit(1);
+  }
 }
 
 void lecture() { /* This function does nothing, it's just here to trigger the end of the father's pause. */  }
@@ -58,8 +58,8 @@ void afficheShareMem(SHMEM* pshmem){
   int i;
   printf("Destination          | nbSeats \n");
   for(i=0; i<20; i++){
-      printf("%s | %d \n", pshmem[i].destination, pshmem[i].nbSeats);
-    }
+    printf("%s | %d \n", pshmem[i].destination, pshmem[i].nbSeats);
+  }
 }
 
 void initShareMem(SHMEM* pshmem) {
@@ -73,21 +73,21 @@ void initShareMem(SHMEM* pshmem) {
 void addShareMem(SHMEM* pshmem, char *destseats){
   char dest[21] = ""; char seats[3]= ""; int i;
   for(i = 0; i < 20; i++) {
-      dest[i] = destseats[i];
+    dest[i] = destseats[i];
   }
   dest[20] = '\0';
   seats[0] = destseats[21];
   seats[1] = destseats[22];
   seats[2] = '\0';
-      printf("dest I : %s\n", dest);
-      printf("seats I : %s\n", seats);
-    i = 0;
+  printf("dest I : %s\n", dest);
+  printf("seats I : %s\n", seats);
+  i = 0;
 
-      while((pshmem[i].destination[0]) != '?' && i < 20) {
-        i++;
-      }
-      strcpy(pshmem[i].destination, dest);
-      pshmem[i].nbSeats = atoi(seats);
+  while((pshmem[i].destination[0]) != '?' && i < 20) {
+    i++;
+  }
+  strcpy(pshmem[i].destination, dest);
+  pshmem[i].nbSeats = atoi(seats);
 }
 
 void main() {
@@ -137,7 +137,7 @@ void main() {
       break;
 
     case 0: // The son of the process : Tirage
-	  	close(desc[0]);
+      close(desc[0]);
 
       int dest;
       int seats;
@@ -145,36 +145,36 @@ void main() {
       int i = 0;
 
       while(1) {
-		 		//printf("entrée boucle fils\n");
-         sleep(3);
-         //printf("sortie sommeil fils\n");
-         srand(time(NULL));
-         seats = rand()%(0-10)+10;// Picks a random number between 0 and 100
-         printf("val seats : %d\n", seats);
-		     char toSend[TAILLEMSGTUBE] = "??????????????????????\0";
+        //printf("entrée boucle fils\n");
+        sleep(3);
+        //printf("sortie sommeil fils\n");
+        srand(time(NULL));
+        seats = rand()%(0-10)+10;// Picks a random number between 0 and 100
+        printf("val seats : %d\n", seats);
+        char toSend[TAILLEMSGTUBE] = "??????????????????????\0";
 
-		     //printf("buffereee : %s\n", intBuffer);
-		     int j;
-		     for (j = 0; j < strlen(destination[i]); j++) {
-			     toSend[j] = destination[i][j];
-		     }
+        //printf("buffereee : %s\n", intBuffer);
+        int j;
+        for (j = 0; j < strlen(destination[i]); j++) {
+          toSend[j] = destination[i][j];
+        }
 
 
-		 char intBuffer[2] = "";
-		 sprintf(intBuffer, "%d", seats);
-		 toSend[TAILLEMSGTUBE-2] = intBuffer[0];
-     toSend[TAILLEMSGTUBE-1] = intBuffer[1];
-		 printf("intbuff : %s \n", intBuffer);
-		 printf("dans le tube : %s \n", toSend);
-      /*Forme des envois dans le tube : 23 char : Destination + Bourrage (?) + Places */
-		 write(desc[1], &toSend,23); //Ecriture de la nouvelle destination dans le pipe
-		 kill(getppid(), SIGCONT); //Envoi du signal pour réveiller écrivain
-		 i++;
+        char intBuffer[2] = "";
+        sprintf(intBuffer, "%d", seats);
+        toSend[TAILLEMSGTUBE-2] = intBuffer[0];
+        toSend[TAILLEMSGTUBE-1] = intBuffer[1];
+        printf("intbuff : %s \n", intBuffer);
+        printf("dans le tube : %s \n", toSend);
+        /*Forme des envois dans le tube : 23 char : Destination + Bourrage (?) + Places */
+        write(desc[1], &toSend,23); //Ecriture de la nouvelle destination dans le pipe
+        kill(getppid(), SIGCONT); //Envoi du signal pour réveiller écrivain
+        i++;
 
-		 if(i==20){i = 0;}	//10 = Taille de la liste de destinations
+        if(i==20){i = 0;}	//10 = Taille de la liste de destinations
       }
       break;
-			
+
     default: // The process itself Ecrivain
       /*
        *
@@ -183,25 +183,25 @@ void main() {
        *
        * */
 
-       //printf("Entrée père\n");
-	     close(desc[1]); //Ecrivain n'a pas besoin d'écrire dans le pipe
-	     signal(SIGINT, finEcrivain);
-	     //Ajout du PID Ecrivain
-	     down(idMutex);
-	     ShrdMem[0].pid = getpid();
-	     ShrdMem[1].pid = pid;
-         up(idMutex);
+      //printf("Entrée père\n");
+      close(desc[1]); //Ecrivain n'a pas besoin d'écrire dans le pipe
+      signal(SIGINT, finEcrivain);
+      //Ajout du PID Ecrivain
+      down(idMutex);
+      ShrdMem[0].pid = getpid();
+      ShrdMem[1].pid = pid;
+      up(idMutex);
 
-         /* Tableau des PIDs
-          * 0 = Ecrivain
-          * 1 = Tirage
-          * 2 = Agence
-          * 3 = Client
-          * 4 = Affichage
-         */
+      /* Tableau des PIDs
+       * 0 = Ecrivain
+       * 1 = Tirage
+       * 2 = Agence
+       * 3 = Client
+       * 4 = Affichage
+       */
 
-       while(1){
-	    //printf("entree boucle pere\n");
+      while(1){
+        //printf("entree boucle pere\n");
         char toAdd[TAILLEMSGTUBE] = "";
         pause();
         //printf("sortie pause pere\n");
@@ -215,7 +215,7 @@ void main() {
         addShareMem(ShrdMem, toAdd);
         afficheShareMem(ShrdMem);
         up(idMutex);
-	    printf("PERE : UP MUTEX\n");
+        printf("PERE : UP MUTEX\n");
 
       }
       break;

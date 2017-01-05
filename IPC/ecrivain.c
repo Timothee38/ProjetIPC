@@ -16,36 +16,36 @@
 #define TAILLEMSGTUBE 23
 
 void finEcrivain(){
-	
+
 	static int premierPassage = 0;
-	
+
 	if(premierPassage == 0){
-		
-		int idMutex = open_semaphore(100);	
+
+		int idMutex = open_semaphore(100);
 		SHMEM *ShrdMem = (SHMEM *)attach_shmem(open_shmem(200,sizeof(SHMEM)*22));
-		
+
 		printf("Lancement de la fermeture\n");
 		signal(SIGINT, finEcrivain);
 		premierPassage = 1;
-		
+
 		kill(ShrdMem[1].pid, SIGKILL); //Fermeture du fils
 		kill(ShrdMem[4].pid, SIGINT); //Femrmeture de l'affichage
-		
+
 	}else{
-		
+
 	  printf("Extinction de l'écrivain\n");
-	  
+
 	  //Supression des mémoires partagées
 	  int idMem;
 	  if (idMem = open_shmem(200, sizeof(SHMEM)*22) == -1) {
 	    perror("fin_open_shmem"); exit(-1);
 	  }
 	  remove_shmem(idMem);
-	  
+
 	  //Supression des sémaphores
 	  remove_semaphore(open_semaphore(100));
 	  remove_semaphore(open_semaphore(400));
-	  
+
 	  //THE END
 	  exit(1);
 	}
@@ -135,16 +135,17 @@ void main() {
     case -1:
       fprintf(stderr, "Erreur lors de la création du fils.\n");
       break;
+
     case 0: // The son of the process : Tirage
-	  close(desc[0]);
-      
+	  	close(desc[0]);
+
       int dest;
       int seats;
       const char* destination[] = {"Paris","New-York","Londres","Tokyo","Amsterdam","Lyon","Pyongyang","Rome","La-Havane","Sydney","San-Francisco","Seoul","Munich","Shangai","Hong-Kong","Singapour","Ho-Chi-Minh","Rio-de-Janeiro","Kuala-Lumpu","We-Are-Number-One"};
       int i = 0;
 
       while(1) {
-		 //printf("entrée boucle fils\n");
+		 		//printf("entrée boucle fils\n");
          sleep(3);
          //printf("sortie sommeil fils\n");
          srand(time(NULL));
@@ -173,6 +174,7 @@ void main() {
 		 if(i==20){i = 0;}	//10 = Taille de la liste de destinations
       }
       break;
+			
     default: // The process itself Ecrivain
       /*
        *
@@ -184,19 +186,19 @@ void main() {
        //printf("Entrée père\n");
 	     close(desc[1]); //Ecrivain n'a pas besoin d'écrire dans le pipe
 	     signal(SIGINT, finEcrivain);
-	     //Ajout du PID Ecrivain 
+	     //Ajout du PID Ecrivain
 	     down(idMutex);
 	     ShrdMem[0].pid = getpid();
-	     ShrdMem[1].pid = pid;     
+	     ShrdMem[1].pid = pid;
          up(idMutex);
-         
+
          /* Tableau des PIDs
           * 0 = Ecrivain
           * 1 = Tirage
           * 2 = Agence
           * 3 = Client
           * 4 = Affichage
-         */	     
+         */
 
        while(1){
 	    //printf("entree boucle pere\n");
@@ -207,7 +209,7 @@ void main() {
         printf("down(idRemainingDest)\n");
         read(desc[0],&toAdd,23);
         printf("dans le pere : %s \n", toAdd);
-        
+
         //on ecrit gentillement la nouvelle entrée dans la case de Database qui va bien
         down(idMutex);
         addShareMem(ShrdMem, toAdd);

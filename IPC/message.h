@@ -1,11 +1,4 @@
-//Structure d'un message
-typedef struct msgContent_model {
-  char dest[20];
-  char seats[2];
-  int pid;
-} MSGCONTENT;
-
-typedef struct msgbuf{
-  long messageType;
-  MSGCONTENT mess;
+typedef struct {
+  long mtype;
+  char mtext[35]; /* Destination 20 o. Seats 2 o. Pid 10 o. + '\0' + 2 '\t' séparateurs*/
 } MSG;

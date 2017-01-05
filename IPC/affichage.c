@@ -16,7 +16,7 @@ void affichageShareMem(SHMEM* pshmem){
     //printf("affichage sharedmem i: ");
     //printf("%s\n", pshmem[i].destination);
     if(pshmem[i].destination[0] != '?') {
-      if (pshmem[i].nbSeats == 0) { // We remove it from the memory
+      if (pshmem[i].nbSeats == 0) { // On le supprime de la mémoire
         strcpy(pshmem[i].destination, "????????????????????\0");
         pshmem[i].nbSeats = 0;
       }
@@ -31,7 +31,7 @@ void finAffichage() {
 
   SHMEM *ShrdMem = (SHMEM *)attach_shmem(open_shmem(200,sizeof(SHMEM)*22));
   printf("Fermeture Affichage\n");
-  kill(ShrdMem[0].pid, SIGINT);  //Fermeture finale de l'écrivain 
+  kill(ShrdMem[0].pid, SIGINT);  //Fermeture finale de l'écrivain
   sleep(1);
   kill(ShrdMem[2].pid, SIGINT); //Femrmeture de l'Agence
 
@@ -60,7 +60,7 @@ void main() {
 
   //Ajout du PID Ecrivain
   down(idMutex);
-  ShrdMem[4].pid = getpid();   
+  ShrdMem[4].pid = getpid();
   up(idMutex);
 
 

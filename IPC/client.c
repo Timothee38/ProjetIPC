@@ -21,15 +21,16 @@ void finClient() {
 
 void commandeValide(){
   printf("Commande Validée avec succès!\n");
-  sleep(10);
+  sleep(9);
   printf("Au revoir!\n");
-
+  sleep(1);
 }
 
 void commandeInvalide(){
   printf("Commande non disponible :(\n");
-  sleep(10);
-  printf("Au revoir!\n");	
+  sleep(9);
+  printf("Au revoir!\n");
+  sleep(1);
 }
 
 void main() {
@@ -60,6 +61,7 @@ void main() {
 
   commande.mtype = 1;
 
+  // Remplissage du message
   strcpy(commande.mtext, dest);
   strcat(commande.mtext, " ");
   strcat(commande.mtext, seats);
@@ -67,7 +69,7 @@ void main() {
   strcat(commande.mtext, convertedPid);
   strcat(commande.mtext, "\0");
 
-  printf("%s\n", commande.mtext);
+  printf("Message envoyé : %s\n", commande.mtext);
 
   // Création et envoi du message dans la BAL
   if((idBoite = msgget(cleBoite, 0666))==-1){

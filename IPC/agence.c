@@ -26,7 +26,7 @@ void finAgence(){
   int idMutex = open_semaphore(100);
   SHMEM *ShrdMem = (SHMEM *)attach_shmem(open_shmem(200,sizeof(SHMEM)*22));
   printf("Fermeture Agence\n");
-  kill(ShrdMem[0].pid, SIGINT);  //Fermeture finale de l'écrivain une 2eme fois pour être sur
+  kill(ShrdMem[0].pid, SIGINT);  // Fermeture finale de l'écrivain une 2eme fois pour être sur
   exit(1);
 
 }
@@ -52,8 +52,7 @@ int verificationMemoire(SHMEM* ShrdMem, char *commande, int seats, int longDest,
             if(ShrdMem[i].nbSeats >= seats){
               //printf("SHRDMEM sts =  %d |sts = %d \n", ShrdMem[i].nbSeats,seats);
               ShrdMem[i].nbSeats = ShrdMem[i].nbSeats - seats;
-              -						printf("Commande Valide!\n");
-              +						//printf("Commande Valide!\n");
+              printf("Commande Valide!\n");
               kill(pidClient, SIGUSR1);
               j = 21;
               i = 21;
@@ -115,6 +114,7 @@ void main(){
 
     sscanf(received.mtext, "%s %s %s", dest, seats, tempPidBuffer);
 
+    // Ajout de \0 pour le formatage des strings
     strcat(dest, "\0");
     strcat(seats, "\0");
 

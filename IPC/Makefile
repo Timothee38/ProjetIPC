@@ -1,7 +1,7 @@
 CC = gcc
 
 all: ecrivain.o semaphore.o affichage.o agence.o client.o
-	$(CC) ecrivain.o semaphore.o -o IPC
+	$(CC) ecrivain.o semaphore.o -o ECRTIR
 	$(CC) affichage.o semaphore.o -o AFF
 	$(CC) agence.o semaphore.o -o AGE
 	$(CC) client.o semaphore.o -o CLT
@@ -31,4 +31,4 @@ semaphore.o:
 	$(CC) -c  semaphore.c -o  semaphore.o
 
 clean:
-	rm -rf *.o IPC AGE AFF CLT
+	rm -rf *.o ECRTIR AGE AFF CLT

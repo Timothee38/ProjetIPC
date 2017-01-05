@@ -51,7 +51,7 @@ void finEcrivain(){
   }
 }
 
-void lecture() { /* This function does nothing, it's just here to trigger the end of the father's pause. */  }
+void lecture() { /* Cette fonction ne sert a rien, a part de sortir de la pause d' Ecrivain */  }
 
 
 void afficheShareMem(SHMEM* pshmem){
@@ -79,10 +79,11 @@ void addShareMem(SHMEM* pshmem, char *destseats){
   seats[0] = destseats[21];
   seats[1] = destseats[22];
   seats[2] = '\0';
-  printf("dest I : %s\n", dest);
-  printf("seats I : %s\n", seats);
+  //printf("dest I : %s\n", dest);
+  //printf("seats I : %s\n", seats);
   i = 0;
 
+  // Ecriture a la derniere ligne innocuppée de la mémoire partagée
   while((pshmem[i].destination[0]) != '?' && i < 20) {
     i++;
   }
@@ -99,44 +100,45 @@ void main() {
 
   signal(SIGCONT, lecture);
 
-  // Initialising and creating the mutex
+  // Creation du sémaphore mutex
   int idMutex  = create_semaphore(cleMutex);
   if(init_semaphore(idMutex, 1)==-1) exit(1);
-  printf("Mutex initialisé\n");
+  //printf("Mutex initialisé\n");
 
-  // Creating the semaphore counting the amount of destinations remaining
+  // Creation du sémaphore de comptage de lignes inoccuppées
   int idRemainingDest = create_semaphore(cleMutex);
   if(init_semaphore(idRemainingDest, 20)==-1) exit(1);
-  printf("Semaphore initialisé\n");
+  //printf("Semaphore initialisé\n");
 
-  // Creating the shared memory
+  // Creation de la mémoire partagée
   int idMem;
   if ((idMem = create_shmem(cleMem, sizeof(SHMEM)*22)) == -1){
     perror("create_shmem");
     exit(-1);
   }
-  printf("%d\n", idMem);
+  //printf("%d\n", idMem);
 
-  printf("Mem initialisé\n");
+  //printf("Mem initialisé\n");
   SHMEM *ShrdMem = (SHMEM *)attach_shmem(idMem);
   initShareMem(ShrdMem);
 
-  // Creating the pipe
+  // Creation du tube
   int desc[2];
   if( pipe(desc) == -1) { printf("erreur de création du pipe\n");exit(1);}
-  printf("pipe initialisé\n");
-  /*
-   *
-   * LeFILS : Tire des destinations dans la lsite et un nombre de places aléatoire et les envoie dans le tube pour le prc PERE
-   *
-   * */
+  //printf("pipe initialisé\n");
+
   switch(pid = fork()) {
 
     case -1:
       fprintf(stderr, "Erreur lors de la création du fils.\n");
       break;
 
-    case 0: // The son of the process : Tirage
+    case 0:
+      /*
+       *
+       * Le FILS, Tirage : Tire des destinations dans la liste et un nombre de places aléatoires et les envoie dans le tube pour le processus PERE, Ecrivain
+       *
+       * */
       close(desc[0]);
 
       int dest;
@@ -149,11 +151,11 @@ void main() {
         sleep(3);
         //printf("sortie sommeil fils\n");
         srand(time(NULL));
-        seats = rand()%(0-10)+10;// Picks a random number between 0 and 100
+        seats = rand()%(0-10)+10;// Tire un nombre au hasard [10, 20]
         printf("val seats : %d\n", seats);
         char toSend[TAILLEMSGTUBE] = "??????????????????????\0";
 
-        //printf("buffereee : %s\n", intBuffer);
+        //printf("buffer : %s\n", intBuffer);
         int j;
         for (j = 0; j < strlen(destination[i]); j++) {
           toSend[j] = destination[i][j];
@@ -164,9 +166,9 @@ void main() {
         sprintf(intBuffer, "%d", seats);
         toSend[TAILLEMSGTUBE-2] = intBuffer[0];
         toSend[TAILLEMSGTUBE-1] = intBuffer[1];
-        printf("intbuff : %s \n", intBuffer);
+        //printf("intbuff : %s \n", intBuffer);
         printf("dans le tube : %s \n", toSend);
-        /*Forme des envois dans le tube : 23 char : Destination + Bourrage (?) + Places */
+        /* Forme des envois dans le tube : 23 char : Destination + Bourrage ('?') + Places */
         write(desc[1], &toSend,23); //Ecriture de la nouvelle destination dans le pipe
         kill(getppid(), SIGCONT); //Envoi du signal pour réveiller écrivain
         i++;
@@ -175,10 +177,10 @@ void main() {
       }
       break;
 
-    default: // The process itself Ecrivain
+    default:
       /*
        *
-       * Le PERE : Recois les infos du fils et les ecrit dans la mémoire
+       * Le PERE, Ecrivain : Recois les infos du fils, Tirage et les ecrit dans la mémoire
        * Fait aussi l'initialisation de la mémoire, sémaphore mutex, sémaphore 20 jetons
        *
        * */
@@ -186,7 +188,7 @@ void main() {
       //printf("Entrée père\n");
       close(desc[1]); //Ecrivain n'a pas besoin d'écrire dans le pipe
       signal(SIGINT, finEcrivain);
-      //Ajout du PID Ecrivain
+      //Ajout du PID Ecrivain dans la mémoire partagée pour la fermeture
       down(idMutex);
       ShrdMem[0].pid = getpid();
       ShrdMem[1].pid = pid;
@@ -206,16 +208,16 @@ void main() {
         pause();
         //printf("sortie pause pere\n");
         down(idRemainingDest);
-        printf("down(idRemainingDest)\n");
+        //printf("down(idRemainingDest)\n");
         read(desc[0],&toAdd,23);
         printf("dans le pere : %s \n", toAdd);
 
-        //on ecrit gentillement la nouvelle entrée dans la case de Database qui va bien
+        //on ecrit la nouvelle entrée dans la base de données
         down(idMutex);
         addShareMem(ShrdMem, toAdd);
         afficheShareMem(ShrdMem);
         up(idMutex);
-        printf("PERE : UP MUTEX\n");
+        //printf("PERE : UP MUTEX\n");
 
       }
       break;

@@ -15,21 +15,23 @@
 
 #define TAILLEMSGTUBE 23
 
+static int PIDAFFICHAGE;
+static int PIDFILS;
+
+
 void finEcrivain(){
 
   static int premierPassage = 0;
 
   if(premierPassage == 0){
 
-    int idMutex = open_semaphore(100);
-    SHMEM *ShrdMem = (SHMEM *)attach_shmem(open_shmem(200,sizeof(SHMEM)*22));
 
     printf("Lancement de la fermeture\n");
     signal(SIGINT, finEcrivain);
     premierPassage = 1;
 
-    kill(ShrdMem[1].pid, SIGKILL); //Fermeture du fils
-    kill(ShrdMem[4].pid, SIGINT); //Femrmeture de l'affichage
+    kill(PIDFILS, SIGKILL); //Fermeture du fils
+    kill(PIDAFFICHAGE, SIGINT); //Fermeture de l'affichage
 
   }else{
 
@@ -216,6 +218,8 @@ void main() {
         down(idMutex);
         addShareMem(ShrdMem, toAdd);
         afficheShareMem(ShrdMem);
+        PIDAFFICHAGE = ShrdMem[4].pid;
+        PIDFILS = ShrdMem[1].pid;
         up(idMutex);
         //printf("PERE : UP MUTEX\n");
 

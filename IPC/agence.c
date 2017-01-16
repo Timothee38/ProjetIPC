@@ -13,9 +13,12 @@
 #include "sharedMemory.h"
 #include "message.h"
 
+static int PIDECRIVAIN;
+
 void finAgence(){
 
   //Fermeture de la boite
+  printf("Fermeture Agence\n");
   int idBoite;
   if ((idBoite = msgget(300, 0666|IPC_CREAT))==-1){
     perror("Erreur boite aux lettres");
@@ -23,10 +26,7 @@ void finAgence(){
   }
   msgctl(idBoite, IPC_RMID, NULL);
 
-  int idMutex = open_semaphore(100);
-  SHMEM *ShrdMem = (SHMEM *)attach_shmem(open_shmem(200,sizeof(SHMEM)*22));
-  printf("Fermeture Agence\n");
-  kill(ShrdMem[0].pid, SIGINT);  // Fermeture de l'écrivain
+  kill(PIDECRIVAIN, SIGINT);  // Fermeture de l'écrivain
   exit(1);
 
 }
@@ -108,7 +108,10 @@ void main(){
   while(1) {
     MSG received;
     char dest[21]; char seats[3]; char tempPidBuffer[10]; int clientPid;
-
+    
+    down(idMutex);
+    PIDECRIVAIN = ShrdMem[0].pid;
+	up(idMutex);
     msgrcv(idBoite, &received, sizeof(received.mtext), 1, 0);
     printf("message reçu; %s ", received.mtext);
 

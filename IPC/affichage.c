@@ -9,6 +9,9 @@
 
 #define TAILLEMSGTUBE 23
 
+static int PIDECRIVAIN;
+static int PIDAGENCE;
+
 void affichageShareMem(SHMEM* pshmem){
   int i;
   printf("\n\nVols Disponibles     | Nombre de places \n\n");
@@ -29,11 +32,11 @@ void affichageShareMem(SHMEM* pshmem){
 
 void finAffichage() {
 
-  SHMEM *ShrdMem = (SHMEM *)attach_shmem(open_shmem(200,sizeof(SHMEM)*22));
+  
   printf("Fermeture Affichage\n");
-  kill(ShrdMem[0].pid, SIGINT);  //Fermeture finale de l'écrivain
-  sleep(1);
-  kill(ShrdMem[2].pid, SIGINT); //Femrmeture de l'Agence
+  
+  kill(PIDECRIVAIN, SIGINT); //Fermeture finale de l'écrivain
+  kill(PIDAGENCE, SIGINT);  //Femrmeture de l'Agence
 
   exit(1);
 }
@@ -54,19 +57,18 @@ void main() {
 
   down(idMutex);
   SHMEM *ShrdMem = (SHMEM *)attach_shmem(open_shmem(cleMem,sizeof(SHMEM)*22));
-  up(idMutex);
-  //printf("Mémoire connectée!\n");
-
-
-  //Ajout du PID Ecrivain
-  down(idMutex);
   ShrdMem[4].pid = getpid();
   up(idMutex);
+  //printf("Mémoire connectée!\n");
+  //Ajout du PID Ecrivain
+
 
 
   while(1) {
     sleep(5);
     down(idMutex);
+    PIDECRIVAIN = ShrdMem[0].pid;
+    PIDAGENCE = ShrdMem[2].pid;
     affichageShareMem(ShrdMem);
     up(idMutex);
   }

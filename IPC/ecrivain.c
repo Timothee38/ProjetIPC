@@ -17,12 +17,14 @@
 
 static int PIDAFFICHAGE;
 static int PIDFILS;
+static int idMem;
 
 
 void finEcrivain(){
 
   static int premierPassage = 0;
 
+	
   if(premierPassage == 0){
 
 
@@ -38,11 +40,7 @@ void finEcrivain(){
     printf("Extinction de l'écrivain\n");
 
     //Supression des mémoires partagées
-    int idMem;
-    if (idMem = open_shmem(200, sizeof(SHMEM)*22) == -1) {
-      perror("fin_open_shmem"); exit(-1);
-    }
-    remove_shmem(idMem);
+    shmctl(idMem, IPC_RMID, 0) ;
 
     //Supression des sémaphores
     remove_semaphore(open_semaphore(100));
@@ -113,7 +111,6 @@ void main() {
   //printf("Semaphore initialisé\n");
 
   // Creation de la mémoire partagée
-  int idMem;
   if ((idMem = create_shmem(cleMem, sizeof(SHMEM)*22)) == -1){
     perror("create_shmem");
     exit(-1);
@@ -145,7 +142,7 @@ void main() {
 
       int dest;
       int seats;
-      const char* destination[] = {"Paris","New-York","Londres","Tokyo","Amsterdam","Lyon","Pyongyang","Rome","La-Havane","Sydney","San-Francisco","Seoul","Munich","Shangai","Hong-Kong","Singapour","Ho-Chi-Minh","Rio-de-Janeiro","Kuala-Lumpu","We-Are-Number-One"};
+      const char* destination[] = {"Paris","New-York","Londres","Tokyo","Amsterdam","Lyon","Pyongyang","Rome","La-Havane","Sydney","San-Francisco","Seoul","Munich","Shangai","Hong-Kong","Singapour","Ho-Chi-Minh","Rio-de-Janeiro","Kuala-Lumpur","We-Are-Number-One"};
       int i = 0;
 
       while(1) {

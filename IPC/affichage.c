@@ -34,7 +34,7 @@ void finAffichage() {
 
   
   printf("Fermeture Affichage\n");
-  
+    
   kill(PIDECRIVAIN, SIGINT); //Fermeture finale de l'écrivain
   kill(PIDAGENCE, SIGINT);  //Femrmeture de l'Agence
 

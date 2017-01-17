@@ -24,6 +24,7 @@ void finAgence(){
     perror("Erreur boite aux lettres");
     exit(-1);
   }
+    
   msgctl(idBoite, IPC_RMID, NULL);
 
   kill(PIDECRIVAIN, SIGINT);  // Fermeture de l'écrivain
